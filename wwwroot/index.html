@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Streaming Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        video {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        select {
+            padding: 8px;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Player</h1>
+
+    <select id="videoSelector" onchange="loadVideo()">
+        <option value="">Select a video</option>
+    </select>
+
+    <video id="videoPlayer" controls>
+        Your browser does not support the video tag.
+    </video>
+
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoSelector = document.getElementById('videoSelector');
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/videos');
+                const videos = await response.json();
+
+                videos.forEach(video => {
+                    const option = document.createElement('option');
+                    option.value = video;
+                    option.textContent = video;
+                    videoSelector.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        });
+
+        function loadVideo() {
+            const selectedVideo = videoSelector.value;
+            if (selectedVideo) {
+                const currentTime = videoPlayer.currentTime;
+
+                videoPlayer.src = `/api/stream/${selectedVideo}`;
+
+                videoPlayer.addEventListener('loadedmetadata', () => {
+                    videoPlayer.currentTime = currentTime;
+                }, { once: true });
+            }
+        }
+    </script>
+</body>
+</html>
